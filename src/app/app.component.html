@@ -1,3 +1,4 @@
+<!--  Start Form -->
 <div class="my-6 max-w-lg mx-auto">
   <form (ngSubmit)="onCreatePost()" [formGroup]="addPostForm">
     <div class="mb-6">
@@ -16,23 +17,23 @@
   <hr class="h-px my-8 bg-gray-200 border-0">
 
   <div class="flex">
-    <button type="button" class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">Fetch Posts</button>
+    <button type="button" (click)="onFetchPosts()" class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">Fetch Posts</button>
     <button type="button" class="text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">Clear Posts</button>
   </div>
 </div>
 
-<div *ngIf="loadedPosts && loadedPosts.length; else empty">
-   
+<!-- End form -->
+
+<!-- Output -->
+<p *ngIf="isFetching" class="mx-auto max-w-lg" >Loading...</p>
+<p *ngIf="loadedPosts.length < 1 && !isFetching" class="mx-auto max-w-lg">The are no available posts.</p>
+
+
+<div *ngIf="loadedPosts.length >= 1 && !isFetching">  
 <ul class="mx-auto max-w-lg">
    <li *ngFor="let post of loadedPosts" class="mb-4 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">{{ post.title }}</h5>
     <p class="font-normal text-gray-700">{{ post.content }}</p>
    </li>
 </ul>
-
 </div>
-
-
-<ng-template #empty>
-  <p class="mx-auto max-w-lg">The are no available posts.</p>
-</ng-template>

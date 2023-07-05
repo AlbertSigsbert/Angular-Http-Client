@@ -14,6 +14,7 @@ export class AppComponent implements OnInit {
   title = 'http-angular';
   addPostForm: FormGroup;
   loadedPosts:Post[] = [];
+  isFetching = false;
 
   constructor(private http: HttpClient) {
     this.addPostForm = new FormGroup({});
@@ -51,6 +52,7 @@ export class AppComponent implements OnInit {
   }
 
   private fetchPosts() {
+    this.isFetching = true;
     this.http
       .get<{ [key: string]: Post }>(
         'https://angular-project-dba2c-default-rtdb.firebaseio.com/post.json'
@@ -69,6 +71,7 @@ export class AppComponent implements OnInit {
       )
       .subscribe((posts) => {
          this.loadedPosts = posts;
+         this.isFetching = false;
       });
   }
 }
