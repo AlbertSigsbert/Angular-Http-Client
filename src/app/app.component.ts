@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { map } from 'rxjs';
+
 
 import { Post } from './post.model';
+import { PostsService } from './posts.service';
 
 @Component({
   selector: 'app-root',
@@ -16,12 +17,16 @@ export class AppComponent implements OnInit {
   loadedPosts:Post[] = [];
   isFetching = false;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private postsService:PostsService) {
     this.addPostForm = new FormGroup({});
   }
 
   ngOnInit(): void {
-    this.fetchPosts();
+    this.isFetching = true;
+    this.postsService.fetchPosts().subscribe(posts => {
+      this.loadedPosts = posts;
+      this.isFetching = false
+    });
 
     this.addPostForm = new FormGroup({
       title: new FormControl(null, [
@@ -36,42 +41,14 @@ export class AppComponent implements OnInit {
   }
 
   onCreatePost() {
-    this.http
-      .post<{ name:string }>(
-        'https://angular-project-dba2c-default-rtdb.firebaseio.com/post.json',
-        this.addPostForm.value
-      )
-      .subscribe((responseData) => {
-        console.log(responseData);
-      });
-    // console.log(this.addPostForm.value);
+    this.postsService.createAndStorePosts(this.addPostForm.value);  
   }
 
   onFetchPosts() {
-    this.fetchPosts();
-  }
-
-  private fetchPosts() {
     this.isFetching = true;
-    this.http
-      .get<{ [key: string]: Post }>(
-        'https://angular-project-dba2c-default-rtdb.firebaseio.com/post.json'
-      )
-      .pipe(
-        map((responseData) => {
-          const postsArr:Post[] = [];
-
-          for (const key in responseData) {
-            if (responseData.hasOwnProperty(key)) {
-              postsArr.push({ ...responseData[key], id: key });
-            }
-          }
-          return postsArr;
-        })
-      )
-      .subscribe((posts) => {
-         this.loadedPosts = posts;
-         this.isFetching = false;
-      });
+    this.postsService.fetchPosts().subscribe(posts => {
+      this.loadedPosts = posts;
+      this.isFetching = false
+    });
   }
 }
