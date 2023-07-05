@@ -1,15 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { map, pipe } from 'rxjs';
+import { map } from 'rxjs';
 
-interface Post {
-  content: string;
-  title: string;
-  id: string;
-}
-
-
+import { Post } from './post.model';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +13,7 @@ interface Post {
 export class AppComponent implements OnInit {
   title = 'http-angular';
   addPostForm: FormGroup;
-  loadedPosts = [];
+  loadedPosts:Post[] = [];
 
   constructor(private http: HttpClient) {
     this.addPostForm = new FormGroup({});
@@ -42,36 +36,39 @@ export class AppComponent implements OnInit {
 
   onCreatePost() {
     this.http
-      .post(
+      .post<{ name:string }>(
         'https://angular-project-dba2c-default-rtdb.firebaseio.com/post.json',
         this.addPostForm.value
       )
       .subscribe((responseData) => {
         console.log(responseData);
       });
-    console.log(this.addPostForm.value);
+    // console.log(this.addPostForm.value);
   }
 
   onFetchPosts() {
     this.fetchPosts();
   }
 
-  private fetchPosts(){
-    this.http.get('https://angular-project-dba2c-default-rtdb.firebaseio.com/post.json').pipe(map(responseData => {
-      const postsArr = [];
+  private fetchPosts() {
+    this.http
+      .get<{ [key: string]: Post }>(
+        'https://angular-project-dba2c-default-rtdb.firebaseio.com/post.json'
+      )
+      .pipe(
+        map((responseData) => {
+          const postsArr:Post[] = [];
 
-      for(const key in (responseData)){
-        if (responseData.hasOwnProperty(key)) {
-          postsArr.push({...responseData[key], id:key});
-        }
-      }
-
-      return postsArr;
-
-    })).subscribe(posts => {
-     
-      console.log(posts);
-      
-    });
+          for (const key in responseData) {
+            if (responseData.hasOwnProperty(key)) {
+              postsArr.push({ ...responseData[key], id: key });
+            }
+          }
+          return postsArr;
+        })
+      )
+      .subscribe((posts) => {
+         this.loadedPosts = posts;
+      });
   }
 }
