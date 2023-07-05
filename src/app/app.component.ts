@@ -51,4 +51,10 @@ export class AppComponent implements OnInit {
       this.isFetching = false
     });
   }
+
+  onClearPosts(){
+    this.postsService.deletePosts().subscribe(() => {
+      this.loadedPosts = [];
+    })
+  }
 }

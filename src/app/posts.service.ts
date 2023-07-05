@@ -38,4 +38,8 @@ export class PostsService {
         })
       )
   }
+
+  deletePosts(){
+    return this.http.delete('https://angular-project-dba2c-default-rtdb.firebaseio.com/post.json');
+  }
 }
