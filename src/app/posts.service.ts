@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs';
+import { Subject, map } from 'rxjs';
 import { Post } from './post.model';
 
 @Injectable({ providedIn: 'root' })
 export class PostsService {
+
+  error = new Subject<string>();
+
   constructor(private http: HttpClient) {}
 
   createAndStorePosts(postContent: Post) {
@@ -15,8 +18,13 @@ export class PostsService {
         'https://angular-project-dba2c-default-rtdb.firebaseio.com/post.json',
         postData
       )
-      .subscribe((responseData) => {
-        console.log(responseData);
+      .subscribe({
+        next:(responseData) => {
+          console.log(responseData);
+        },
+        error:(e) => {
+          this.error.next(e.message)
+        }
       });
   }
 

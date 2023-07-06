@@ -25,8 +25,13 @@
 <!-- End form -->
 
 <!-- Output -->
-<p *ngIf="isFetching" class="mx-auto max-w-lg" >Loading...</p>
+<p *ngIf="isFetching && !error" class="mx-auto max-w-lg" >Loading...</p>
 <p *ngIf="loadedPosts.length < 1 && !isFetching" class="mx-auto max-w-lg">The are no available posts.</p>
+
+<div *ngIf="error" class="mx-auto max-w-lg">
+   <h1>Error</h1>
+   <p>{{error }}</p>
+</div>
 
 
 <div *ngIf="loadedPosts.length >= 1 && !isFetching">  

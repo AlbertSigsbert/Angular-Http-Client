@@ -1,31 +1,44 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 
 import { Post } from './post.model';
 import { PostsService } from './posts.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'http-angular';
   addPostForm: FormGroup;
   loadedPosts:Post[] = [];
   isFetching = false;
+  error:null | any = null;
+  private errorSub: Subscription;
 
-  constructor(private http: HttpClient, private postsService:PostsService) {
+  constructor(private postsService:PostsService) {
     this.addPostForm = new FormGroup({});
+    this.errorSub = new Subscription;
   }
 
   ngOnInit(): void {
+    this.errorSub = this.postsService.error.subscribe(errorMessage =>{
+      this.error = errorMessage;
+    })
+
     this.isFetching = true;
-    this.postsService.fetchPosts().subscribe(posts => {
-      this.loadedPosts = posts;
-      this.isFetching = false
+    this.postsService.fetchPosts().subscribe({
+      next: (posts) => {
+        this.loadedPosts = posts;
+        this.isFetching = false;
+      },
+      error: (error) => {
+        this.error = error.message;
+      },
     });
 
     this.addPostForm = new FormGroup({
@@ -46,9 +59,14 @@ export class AppComponent implements OnInit {
 
   onFetchPosts() {
     this.isFetching = true;
-    this.postsService.fetchPosts().subscribe(posts => {
-      this.loadedPosts = posts;
-      this.isFetching = false
+    this.postsService.fetchPosts().subscribe({
+      next: (posts) => {
+        this.loadedPosts = posts;
+        this.isFetching = false;
+      },
+      error: (error) => {
+        this.error = error.message;
+      },
     });
   }
 
@@ -56,5 +74,9 @@ export class AppComponent implements OnInit {
     this.postsService.deletePosts().subscribe(() => {
       this.loadedPosts = [];
     })
+  }
+
+  ngOnDestroy(): void {
+    this.errorSub.unsubscribe();
   }
 }
